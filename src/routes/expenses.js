@@ -5,12 +5,40 @@ import { requireAuth } from '../middleware/auth.js';
 const router = Router();
 router.use(requireAuth); // every expense route needs a valid token
 
-// GET /api/expenses  (newest first)
+// GET /api/expenses  (newest first, optionally filtered by date range and category)
 router.get('/', async (req, res) => {
   try {
+    const { startDate, endDate, category } = req.query;
+    const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+
+    if (startDate && !datePattern.test(startDate))
+      return res.status(400).json({ error: 'startDate must use YYYY-MM-DD format' });
+    if (endDate && !datePattern.test(endDate))
+      return res.status(400).json({ error: 'endDate must use YYYY-MM-DD format' });
+    if (startDate && endDate && startDate > endDate)
+      return res.status(400).json({ error: 'startDate must be on or before endDate' });
+    if (category !== undefined && (typeof category !== 'string' || !category.trim()))
+      return res.status(400).json({ error: 'category must be a non-empty string' });
+
+    const conditions = ['user_id = ?'];
+    const params = [req.user.id];
+    if (startDate) {
+      conditions.push('date >= ?');
+      params.push(startDate);
+    }
+    if (endDate) {
+      conditions.push('date <= ?');
+      params.push(endDate);
+    }
+    if (category !== undefined) {
+      conditions.push('category = ?');
+      params.push(category.trim());
+    }
+
     const rows = await db(
-      'SELECT id, description, amount, category, date, created_at FROM expenses WHERE user_id = ? ORDER BY date DESC, id DESC',
-      [req.user.id]
+      `SELECT id, description, amount, category, date, created_at
+       FROM expenses WHERE ${conditions.join(' AND ')} ORDER BY date DESC, id DESC`,
+      params
     );
     res.json(rows);
   } catch (err) {

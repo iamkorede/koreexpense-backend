@@ -25,7 +25,7 @@ Node/Express + MySQL + JWT backend for [koreExpense](https://github.com/iamkored
 |--------|-------|------|-------------|
 | POST | /api/auth/register | - | Create account, returns token |
 | POST | /api/auth/login | - | Log in, returns token |
-| GET | /api/expenses | Bearer token | List expenses, newest first |
+| GET | /api/expenses | Bearer token | List expenses, newest first; optional `startDate`, `endDate` (YYYY-MM-DD), and `category` query filters |
 | GET | /api/expenses/summary | Bearer token | Total, avg, highest, top categories |
 | POST | /api/expenses | Bearer token | Add expense { description, amount, category?, date? } |
 | DELETE | /api/expenses/:id | Bearer token | Delete an expense |
