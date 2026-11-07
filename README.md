@@ -20,9 +20,14 @@ Node/Express + MySQL + JWT backend for [koreExpense](https://github.com/iamkored
 3. Create the tables: mysql -u root -p < schema.sql
 4. Start the server on port 5000
 
+## Health check
+`GET /health` runs a lightweight `SELECT 1` against MySQL. It returns HTTP 200 with `{ "ok": true, "database": "connected" }` when the database is reachable, or HTTP 503 with `{ "ok": false, "database": "unavailable" }` when it is not. It does not expose connection details.
+
 ## Endpoints
 | Method | Route | Auth | Description |
 |--------|-------|------|-------------|
+| GET | / | - | API service status |
+| GET | /health | - | Check API and MySQL connectivity (503 if database is unavailable) |
 | POST | /api/auth/register | - | Create account, returns token |
 | POST | /api/auth/login | - | Log in, returns token |
 | GET | /api/expenses | Bearer token | List expenses, newest first; optional `startDate`, `endDate` (YYYY-MM-DD), and `category` query filters |
